@@ -74,7 +74,10 @@ export function PagePanel({ page, parentId, projectId, onClose, onSave, onDelete
       setMetaTitle("");
       setMetaDescription("");
       setKeyword("");
-      setPageType("");
+      // Auto-assign page type based on parent:
+      // child → Standard Page, root-level → Pillar Page
+      // (will upgrade to Home Page if user types "/" as URL)
+      setPageType(parentId ? "Standard Page" : "Pillar Page");
       setNotes("");
     }
     setError("");
@@ -174,7 +177,18 @@ export function PagePanel({ page, parentId, projectId, onClose, onSave, onDelete
             <Input
               id="panel-url"
               value={url}
-              onChange={(e) => setUrl(e.target.value)}
+              onChange={(e) => {
+                const v = e.target.value;
+                setUrl(v);
+                // Auto-set page type based on URL for new pages
+                if (isNew) {
+                  if (v.trim() === "/") {
+                    setPageType("Home Page");
+                  } else if (!parentId && pageType === "Home Page" && v.trim() !== "/") {
+                    setPageType("Pillar Page");
+                  }
+                }
+              }}
               placeholder="/about"
               className="font-mono text-sm"
             />

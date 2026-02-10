@@ -22,13 +22,14 @@ interface SiteTreeProps {
 const TYPE_COLORS: Record<string, string> = {
   "Home Page": "bg-green-100 text-green-700",
   "Pillar Page": "bg-purple-100 text-purple-700",
-  "Index Page": "bg-sky-100 text-sky-700",
   "Standard Page": "bg-zinc-100 text-zinc-700",
   "Blog Post": "bg-emerald-100 text-emerald-700",
   "Landing Page": "bg-orange-100 text-orange-700",
-  "Resource Page": "bg-teal-100 text-teal-700",
-  "FAQ Page": "bg-yellow-100 text-yellow-700",
-  "Contact Page": "bg-pink-100 text-pink-700",
+  // Legacy types → closest match
+  "Index Page": "bg-purple-100 text-purple-700",
+  "Resource Page": "bg-zinc-100 text-zinc-700",
+  "FAQ Page": "bg-zinc-100 text-zinc-700",
+  "Contact Page": "bg-zinc-100 text-zinc-700",
 };
 
 function ChevronIcon({ open, className }: { open: boolean; className?: string }) {

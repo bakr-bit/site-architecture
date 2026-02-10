@@ -90,12 +90,21 @@ export function getPillarColorMap(pages: Page[]): Map<string, PillarColor> {
     pillarColorMap.set(pillarIds[i], PILLAR_PALETTE[i % PILLAR_PALETTE.length]);
   }
 
-  // Map every page to its pillar's colour (root pages excluded)
+  // Dedicated color for root/home pages
+  const ROOT_COLOR: PillarColor = {
+    badge: "bg-green-100 text-green-700",
+    border: "#22c55e",
+    bg: "bg-green-50",
+  };
+
+  // Map every page to its pillar's colour; root pages get the home color
   const result = new Map<string, PillarColor>();
   for (const page of pages) {
     const pid = getPillarId(page);
     if (pid) {
       result.set(page.id, pillarColorMap.get(pid)!);
+    } else if (rootIds.has(page.id)) {
+      result.set(page.id, ROOT_COLOR);
     }
   }
   return result;

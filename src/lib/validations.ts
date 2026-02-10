@@ -3,13 +3,9 @@ import { z } from "zod";
 export const PAGE_TYPES = [
   "Home Page",
   "Pillar Page",
-  "Index Page",
   "Standard Page",
   "Blog Post",
   "Landing Page",
-  "Resource Page",
-  "FAQ Page",
-  "Contact Page",
 ] as const;
 
 export const createProjectSchema = z.object({
