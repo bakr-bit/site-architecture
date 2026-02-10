@@ -1,0 +1,49 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  name         String?
+  createdAt    DateTime @default(now())
+}
+
+model Project {
+  id          String   @id @default(uuid())
+  name        String
+  domain      String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  pages       Page[]
+}
+
+model Page {
+  id              String   @id @default(uuid())
+  projectId       String
+  url             String
+  userDescription String?
+  metaTitle       String?
+  metaDescription String?
+  keyword         String?
+  pageType        String?
+  level           Int      @default(0)
+  notes           String?
+  position        Int      @default(0)
+  parentId        String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  project         Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  parent          Page?    @relation("PageTree", fields: [parentId], references: [id], onDelete: SetNull)
+  children        Page[]   @relation("PageTree")
+
+  @@unique([projectId, url])
+  @@index([projectId])
+  @@index([parentId])
+}
