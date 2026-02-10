@@ -11,6 +11,7 @@ export type { Page };
 interface SiteTreeProps {
   pages: Page[];
   pillarColors: Map<string, PillarColor>;
+  iconMap: Map<string, string>;
   selectedPageId: string | null;
   onSelectPage: (pageId: string) => void;
   onAddChild: (parentId: string | null) => void;
@@ -50,14 +51,16 @@ function PlusIcon({ className }: { className?: string }) {
 
 function Node({ node, style, dragHandle, tree }: NodeRendererProps<TreeNode>) {
   const page = node.data.data;
-  const { onSelectPage, onAddChild, selectedPageId, pillarColors } = tree.props as unknown as {
+  const { onSelectPage, onAddChild, selectedPageId, pillarColors, iconMap } = tree.props as unknown as {
     onSelectPage: (id: string) => void;
     onAddChild: (parentId: string | null) => void;
     selectedPageId: string | null;
     pillarColors: Map<string, PillarColor>;
+    iconMap: Map<string, string>;
   };
   const isSelected = selectedPageId === node.id;
   const pillarColor = pillarColors.get(node.id);
+  const resolvedIcon = iconMap.get(node.id);
 
   return (
     <div
@@ -94,7 +97,12 @@ function Node({ node, style, dragHandle, tree }: NodeRendererProps<TreeNode>) {
         <ChevronIcon open={node.isOpen} />
       </span>
 
-      {/* Page URL */}
+      {/* Icon + Page URL */}
+      {resolvedIcon && (
+        <span className="text-sm shrink-0" title={page.icon ? "Own icon" : "Inherited icon"}>
+          {resolvedIcon}
+        </span>
+      )}
       <span className="font-mono text-xs text-zinc-600 truncate max-w-[240px]">
         {page.url}
       </span>
@@ -138,6 +146,7 @@ function Node({ node, style, dragHandle, tree }: NodeRendererProps<TreeNode>) {
 export function SiteTree({
   pages,
   pillarColors,
+  iconMap,
   selectedPageId,
   onSelectPage,
   onAddChild,
@@ -341,6 +350,7 @@ export function SiteTree({
             onAddChild,
             selectedPageId,
             pillarColors,
+            iconMap,
           } as any)}
         >
           {Node}

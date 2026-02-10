@@ -33,6 +33,7 @@ model Page {
   metaDescription String?
   keyword         String?
   pageType        String?
+  icon            String?
   level           Int      @default(0)
   notes           String?
   position        Int      @default(0)

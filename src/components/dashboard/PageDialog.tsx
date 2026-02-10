@@ -29,6 +29,7 @@ interface Page {
   metaDescription: string | null;
   keyword: string | null;
   pageType: string | null;
+  icon: string | null;
   level: number;
   notes: string | null;
   parentId: string | null;
@@ -49,6 +50,7 @@ export function PageDialog({ open, onOpenChange, page, projectId, onSuccess }: P
   const [metaDescription, setMetaDescription] = useState("");
   const [keyword, setKeyword] = useState("");
   const [pageType, setPageType] = useState("");
+  const [icon, setIcon] = useState("");
   const [level, setLevel] = useState("0");
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
@@ -62,6 +64,7 @@ export function PageDialog({ open, onOpenChange, page, projectId, onSuccess }: P
       setMetaDescription(page.metaDescription || "");
       setKeyword(page.keyword || "");
       setPageType(page.pageType || "");
+      setIcon(page.icon || "");
       setLevel(String(page.level));
       setNotes(page.notes || "");
     } else {
@@ -71,6 +74,7 @@ export function PageDialog({ open, onOpenChange, page, projectId, onSuccess }: P
       setMetaDescription("");
       setKeyword("");
       setPageType("");
+      setIcon("");
       setLevel("0");
       setNotes("");
     }
@@ -97,6 +101,8 @@ export function PageDialog({ open, onOpenChange, page, projectId, onSuccess }: P
       if (metaDescription) body.metaDescription = metaDescription;
       if (keyword) body.keyword = keyword;
       if (pageType) body.pageType = pageType;
+      if (icon) body.icon = icon;
+      else if (page?.icon) body.icon = null;
       if (notes) body.notes = notes;
 
       const res = await fetch(apiUrl, {
@@ -198,6 +204,19 @@ export function PageDialog({ open, onOpenChange, page, projectId, onSuccess }: P
           {/* Structure */}
           <div className="space-y-4">
             <h3 className="text-sm font-medium text-zinc-500 uppercase tracking-wider">Structure</h3>
+            <div className="space-y-2">
+              <Label htmlFor="page-icon">Icon</Label>
+              <div className="flex items-center gap-2">
+                <Input
+                  id="page-icon"
+                  value={icon}
+                  onChange={(e) => setIcon(e.target.value)}
+                  placeholder="🏠"
+                  className="w-20"
+                />
+                <span className="text-xs text-zinc-400">Emoji — children inherit if empty</span>
+              </div>
+            </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Page Type</Label>

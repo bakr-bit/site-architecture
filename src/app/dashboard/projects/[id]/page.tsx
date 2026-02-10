@@ -5,6 +5,12 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
 import { PageTable } from "@/components/dashboard/PageTable";
 import { SiteTree } from "@/components/dashboard/SiteTree";
 import { SiteFlow } from "@/components/dashboard/SiteFlow";
@@ -12,8 +18,9 @@ import { PageDialog } from "@/components/dashboard/PageDialog";
 import { PagePanel } from "@/components/dashboard/PagePanel";
 import { ImportDialog } from "@/components/dashboard/ImportDialog";
 import { SitemapImportDialog } from "@/components/dashboard/SitemapImportDialog";
+import { GenerateDialog } from "@/components/dashboard/GenerateDialog";
 import { ViewToggle } from "@/components/dashboard/ViewToggle";
-import { pagesToCsv, getPillarColorMap } from "@/lib/tree-helpers";
+import { pagesToCsv, pagesToSitemapXml, getPillarColorMap, getIconMap } from "@/lib/tree-helpers";
 import type { PillarColor } from "@/lib/tree-helpers";
 import { toast } from "sonner";
 
@@ -25,6 +32,7 @@ interface Page {
   metaDescription: string | null;
   keyword: string | null;
   pageType: string | null;
+  icon: string | null;
   level: number;
   notes: string | null;
   position: number;
@@ -58,6 +66,7 @@ export default function ProjectDetailPage() {
   const [pageDialogOpen, setPageDialogOpen] = useState(false);
   const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [sitemapDialogOpen, setSitemapDialogOpen] = useState(false);
+  const [generateDialogOpen, setGenerateDialogOpen] = useState(false);
   const [editingPage, setEditingPage] = useState<Page | null>(null);
 
   // Tree-specific state
@@ -69,6 +78,11 @@ export default function ProjectDetailPage() {
 
   const pillarColors = useMemo(
     () => getPillarColorMap(project?.pages || []),
+    [project?.pages]
+  );
+
+  const iconMap = useMemo(
+    () => getIconMap(project?.pages || []),
     [project?.pages]
   );
 
@@ -212,30 +226,50 @@ export default function ProjectDetailPage() {
           <ViewToggle view={view} onViewChange={setView} />
         </div>
         <div className="flex items-center gap-1.5">
+          <Button size="sm" onClick={() => setGenerateDialogOpen(true)}>
+            AI Generate
+          </Button>
           <Button size="sm" variant="outline" onClick={() => setSitemapDialogOpen(true)}>
             Import Sitemap
           </Button>
           <Button size="sm" variant="outline" onClick={() => setImportDialogOpen(true)}>
             Import CSV
           </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => {
-              if (!project || project.pages.length === 0) return;
-              const csv = pagesToCsv(project.pages);
-              const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-              const url = URL.createObjectURL(blob);
-              const a = document.createElement("a");
-              a.href = url;
-              a.download = `${project.domain || project.name}-pages.csv`;
-              a.click();
-              URL.revokeObjectURL(url);
-            }}
-            disabled={!project || project.pages.length === 0}
-          >
-            Export CSV
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button size="sm" variant="outline" disabled={!project || project.pages.length === 0}>
+                Export
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => {
+                if (!project || project.pages.length === 0) return;
+                const csv = pagesToCsv(project.pages);
+                const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = `${project.domain || project.name}-pages.csv`;
+                a.click();
+                URL.revokeObjectURL(url);
+              }}>
+                As CSV
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => {
+                if (!project || project.pages.length === 0) return;
+                const xml = pagesToSitemapXml(project.pages, project.domain);
+                const blob = new Blob([xml], { type: "application/xml;charset=utf-8;" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = `${project.domain || project.name}-sitemap.xml`;
+                a.click();
+                URL.revokeObjectURL(url);
+              }}>
+                As XML Sitemap
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
           {view === "table" && (
             <Button size="sm" onClick={() => { setEditingPage(null); setPageDialogOpen(true); }}>
               Add Page
@@ -250,6 +284,7 @@ export default function ProjectDetailPage() {
           <PageTable
             pages={filteredPages}
             pillarColors={pillarColors}
+            iconMap={iconMap}
             onEdit={handleEditPageDialog}
             onDelete={handleDeletePageWithConfirm}
           />
@@ -259,6 +294,7 @@ export default function ProjectDetailPage() {
               <SiteFlow
                 pages={filteredPages}
                 pillarColors={pillarColors}
+                iconMap={iconMap}
                 selectedPageId={selectedPageId}
                 onSelectPage={handleSelectPage}
                 onAddChild={handleAddChild}
@@ -281,6 +317,7 @@ export default function ProjectDetailPage() {
               <SiteTree
                 pages={filteredPages}
                 pillarColors={pillarColors}
+                iconMap={iconMap}
                 selectedPageId={selectedPageId}
                 onSelectPage={handleSelectPage}
                 onAddChild={handleAddChild}
@@ -332,6 +369,16 @@ export default function ProjectDetailPage() {
         onSuccess={() => {
           loadProject();
           toast.success("Sitemap imported successfully");
+        }}
+      />
+
+      <GenerateDialog
+        open={generateDialogOpen}
+        onOpenChange={setGenerateDialogOpen}
+        projectId={projectId}
+        onSuccess={() => {
+          loadProject();
+          toast.success("Architecture generated");
         }}
       />
     </div>

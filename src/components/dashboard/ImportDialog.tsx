@@ -27,6 +27,7 @@ interface ParsedRow {
   metaDescription?: string;
   keyword?: string;
   pageType?: string;
+  icon?: string;
   level?: number;
   navI?: string;
   navII?: string;
@@ -66,6 +67,8 @@ const HEADER_MAP: Record<string, string> = {
   naviii: "navIII",
   notes: "notes",
   note: "notes",
+  icon: "icon",
+  emoji: "icon",
 };
 
 function detectDelimiter(text: string): string {

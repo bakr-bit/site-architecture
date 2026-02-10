@@ -20,6 +20,7 @@ import type { Page, PillarColor } from "@/lib/tree-helpers";
 interface SiteFlowProps {
   pages: Page[];
   pillarColors: Map<string, PillarColor>;
+  iconMap: Map<string, string>;
   selectedPageId: string | null;
   onSelectPage: (pageId: string) => void;
   onAddChild: (parentId: string | null) => void;
@@ -44,7 +45,8 @@ function pagesToFlow(
   pages: Page[],
   selectedPageId: string | null,
   onAddChild: (parentId: string | null) => void,
-  pillarColors: Map<string, PillarColor>
+  pillarColors: Map<string, PillarColor>,
+  iconMap: Map<string, string>
 ): { nodes: Node[]; edges: Edge[] } {
   const g = new dagre.graphlib.Graph();
   g.setDefaultEdgeLabel(() => ({}));
@@ -76,7 +78,7 @@ function pagesToFlow(
       id: page.id,
       type: "page",
       position: { x: pos.x - NODE_WIDTH / 2, y: pos.y - NODE_HEIGHT / 2 },
-      data: { page, selected: page.id === selectedPageId, onAddChild, pillarColor: pillarColors.get(page.id) },
+      data: { page, selected: page.id === selectedPageId, onAddChild, pillarColor: pillarColors.get(page.id), resolvedIcon: iconMap.get(page.id) },
     };
   });
 
@@ -84,11 +86,12 @@ function pagesToFlow(
 }
 
 function PageNode({ data }: NodeProps) {
-  const { page, selected, onAddChild, pillarColor } = data as {
+  const { page, selected, onAddChild, pillarColor, resolvedIcon } = data as {
     page: Page;
     selected: boolean;
     onAddChild: (parentId: string | null) => void;
     pillarColor?: PillarColor;
+    resolvedIcon?: string;
   };
   const hasParent = page.parentId !== null;
 
@@ -108,8 +111,9 @@ function PageNode({ data }: NodeProps) {
           selected ? "ring-2 ring-blue-500 shadow-md" : "hover:shadow-md"
         )}
       >
-        <div className="font-mono text-sm text-zinc-900 truncate mb-1.5">
-          {page.url}
+        <div className="font-mono text-sm text-zinc-900 truncate mb-1.5 flex items-center gap-1.5">
+          {resolvedIcon && <span className="text-base shrink-0">{resolvedIcon}</span>}
+          <span className="truncate">{page.url}</span>
         </div>
         <div className="flex items-center gap-2">
           {page.pageType && (
@@ -162,13 +166,14 @@ function PlusIcon({ className }: { className?: string }) {
 export function SiteFlow({
   pages,
   pillarColors,
+  iconMap,
   selectedPageId,
   onSelectPage,
   onAddChild,
 }: SiteFlowProps) {
   const { nodes, edges } = useMemo(
-    () => pagesToFlow(pages, selectedPageId, onAddChild, pillarColors),
-    [pages, selectedPageId, onAddChild, pillarColors]
+    () => pagesToFlow(pages, selectedPageId, onAddChild, pillarColors, iconMap),
+    [pages, selectedPageId, onAddChild, pillarColors, iconMap]
   );
 
   const handleNodeClick = useCallback(

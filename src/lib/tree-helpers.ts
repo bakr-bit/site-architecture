@@ -6,6 +6,7 @@ export interface Page {
   metaDescription: string | null;
   keyword: string | null;
   pageType: string | null;
+  icon: string | null;
   level: number;
   notes: string | null;
   position: number;
@@ -106,6 +107,41 @@ export function getPillarColorMap(pages: Page[]): Map<string, PillarColor> {
     } else if (rootIds.has(page.id)) {
       result.set(page.id, ROOT_COLOR);
     }
+  }
+  return result;
+}
+
+/**
+ * Builds a map from page ID → resolved icon (emoji string).
+ * If a page has no icon, it inherits from the nearest ancestor that has one.
+ */
+export function getIconMap(pages: Page[]): Map<string, string> {
+  const pageMap = new Map<string, Page>();
+  for (const p of pages) pageMap.set(p.id, p);
+
+  const cache = new Map<string, string>();
+
+  function resolve(page: Page): string | null {
+    if (cache.has(page.id)) return cache.get(page.id) || null;
+    if (page.icon) {
+      cache.set(page.id, page.icon);
+      return page.icon;
+    }
+    if (page.parentId && pageMap.has(page.parentId)) {
+      const inherited = resolve(pageMap.get(page.parentId)!);
+      if (inherited) {
+        cache.set(page.id, inherited);
+        return inherited;
+      }
+    }
+    cache.set(page.id, "");
+    return null;
+  }
+
+  const result = new Map<string, string>();
+  for (const page of pages) {
+    const icon = resolve(page);
+    if (icon) result.set(page.id, icon);
   }
   return result;
 }
@@ -220,7 +256,7 @@ export function rewriteUrls(nodes: TreeNode[], parentUrl: string | null): void {
  */
 export function pagesToCsv(pages: Page[]): string {
   const enriched = computeNavFields(pages);
-  const headers = ["URL", "Meta Title", "Meta Description", "Target Keywords", "Page Type", "Level", "Nav I", "Nav II", "Nav III", "Description", "Notes"];
+  const headers = ["URL", "Meta Title", "Meta Description", "Target Keywords", "Page Type", "Icon", "Level", "Nav I", "Nav II", "Nav III", "Description", "Notes"];
 
   function esc(val: string | number | null | undefined): string {
     if (val == null) return "";
@@ -232,7 +268,7 @@ export function pagesToCsv(pages: Page[]): string {
   }
 
   const rows = enriched.map((p) =>
-    [p.url, p.metaTitle, p.metaDescription, p.keyword, p.pageType, p.level, p.navI, p.navII, p.navIII, p.userDescription, p.notes]
+    [p.url, p.metaTitle, p.metaDescription, p.keyword, p.pageType, p.icon, p.level, p.navI, p.navII, p.navIII, p.userDescription, p.notes]
       .map(esc)
       .join(",")
   );
@@ -275,4 +311,24 @@ export function computeNavFields(
       navIII: ancestors.length > 2 ? getName(ancestors[2]) : ancestors.length > 1 ? getName(page) : null,
     };
   });
+}
+
+/**
+ * Generates an XML sitemap string from pages and a domain.
+ * Outputs standard sitemap protocol (sitemaps.org/schemas/sitemap/0.9).
+ */
+export function pagesToSitemapXml(pages: Page[], domain: string): string {
+  const host = domain.replace(/\/+$/, "");
+  const protocol = host.startsWith("http") ? "" : "https://";
+
+  function esc(s: string): string {
+    return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&apos;");
+  }
+
+  const urls = pages.map((p) => {
+    const loc = p.url === "/" ? `${protocol}${host}/` : `${protocol}${host}${p.url}`;
+    return `  <url>\n    <loc>${esc(loc)}</loc>\n  </url>`;
+  });
+
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.join("\n")}\n</urlset>\n`;
 }

@@ -22,6 +22,7 @@ import type { Page, PillarColor } from "@/lib/tree-helpers";
 interface PageTableProps {
   pages: Page[];
   pillarColors: Map<string, PillarColor>;
+  iconMap: Map<string, string>;
   onEdit: (page: Page) => void;
   onDelete: (pageId: string) => void;
 }
@@ -53,7 +54,7 @@ function MoreIcon({ className }: { className?: string }) {
   );
 }
 
-export function PageTable({ pages, pillarColors, onEdit, onDelete }: PageTableProps) {
+export function PageTable({ pages, pillarColors, iconMap, onEdit, onDelete }: PageTableProps) {
   if (pages.length === 0) {
     return (
       <div className="text-center py-12 text-zinc-500">
@@ -88,7 +89,10 @@ export function PageTable({ pages, pillarColors, onEdit, onDelete }: PageTablePr
             <TableRow key={page.id}>
               <TableCell className="text-zinc-400 text-xs">{index + 1}</TableCell>
               <TableCell>
-                <span className="font-mono text-xs max-w-[200px] truncate block">{page.url}</span>
+                <span className="font-mono text-xs max-w-[200px] truncate block">
+                  {iconMap.get(page.id) && <span className="mr-1">{iconMap.get(page.id)}</span>}
+                  {page.url}
+                </span>
               </TableCell>
               <TableCell>
                 <span className="text-sm max-w-[180px] truncate block">{page.userDescription || "\u2014"}</span>

@@ -22,6 +22,7 @@ interface Page {
   metaDescription: string | null;
   keyword: string | null;
   pageType: string | null;
+  icon: string | null;
   level: number;
   notes: string | null;
   position: number;
@@ -52,6 +53,7 @@ export function PagePanel({ page, parentId, projectId, onClose, onSave, onDelete
   const [metaDescription, setMetaDescription] = useState("");
   const [keyword, setKeyword] = useState("");
   const [pageType, setPageType] = useState("");
+  const [icon, setIcon] = useState("");
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -67,6 +69,7 @@ export function PagePanel({ page, parentId, projectId, onClose, onSave, onDelete
       setMetaDescription(page.metaDescription || "");
       setKeyword(page.keyword || "");
       setPageType(page.pageType || "");
+      setIcon(page.icon || "");
       setNotes(page.notes || "");
     } else {
       setUrl("");
@@ -78,6 +81,7 @@ export function PagePanel({ page, parentId, projectId, onClose, onSave, onDelete
       // child → Standard Page, root-level → Pillar Page
       // (will upgrade to Home Page if user types "/" as URL)
       setPageType(parentId ? "Standard Page" : "Pillar Page");
+      setIcon("");
       setNotes("");
     }
     setError("");
@@ -105,6 +109,9 @@ export function PagePanel({ page, parentId, projectId, onClose, onSave, onDelete
       if (metaDescription) body.metaDescription = metaDescription;
       if (keyword) body.keyword = keyword;
       if (pageType) body.pageType = pageType;
+      // Send icon: empty string clears it (null), non-empty sets it
+      if (icon) body.icon = icon;
+      else if (page?.icon) body.icon = null; // explicitly clear if it was set before
       if (notes) body.notes = notes;
 
       // For new pages, set parentId
@@ -251,6 +258,17 @@ export function PagePanel({ page, parentId, projectId, onClose, onSave, onDelete
         {/* Structure */}
         <div className="space-y-3">
           <h3 className="text-xs font-medium text-zinc-400 uppercase tracking-wider">Structure</h3>
+          <div className="space-y-1.5">
+            <Label htmlFor="panel-icon" className="text-xs">Icon</Label>
+            <Input
+              id="panel-icon"
+              value={icon}
+              onChange={(e) => setIcon(e.target.value)}
+              placeholder="🏠"
+              className="text-sm w-20"
+            />
+            <p className="text-[10px] text-zinc-400">Emoji — children inherit if empty</p>
+          </div>
           <div className="space-y-1.5">
             <Label className="text-xs">Page Type</Label>
             <Select value={pageType} onValueChange={setPageType}>
