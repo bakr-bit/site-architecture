@@ -108,28 +108,13 @@ export async function POST(
 
 type GeneratedPage = z.infer<typeof generatedPagesSchema>[number];
 
-function postProcessPages(pages: GeneratedPage[], keyword: string): GeneratedPage[] {
+function postProcessPages(pages: GeneratedPage[]): GeneratedPage[] {
   // Remove duplicate home pages — keep only url "/", drop /home, /us, etc.
   pages = pages.filter(
     (p) => !(p.pageType === "Home Page" && p.url !== "/")
   );
 
   const urlSet = new Set(pages.map((p) => p.url));
-
-  // Ensure home page exists
-  if (!urlSet.has("/")) {
-    pages.unshift({
-      url: "/",
-      metaTitle: "Home",
-      metaDescription: "",
-      keyword: keyword,
-      pageType: "Home Page",
-      userDescription: "",
-      level: 0,
-      parentUrl: null,
-    });
-    urlSet.add("/");
-  }
 
   // Fix orphan parentUrl references
   for (const page of pages) {
@@ -323,7 +308,7 @@ async function handleGenerate(request: Request, projectId: string) {
         return {
           label: config.label,
           description: config.description,
-          pages: postProcessPages([...pages], keyword),
+          pages: postProcessPages([...pages]),
         };
       })
     )
