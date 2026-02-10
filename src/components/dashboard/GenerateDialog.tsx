@@ -209,11 +209,31 @@ function PageTree({
   depth: number;
   colorMap: Map<string, { badge: string; bg: string }>;
 }) {
-  const children = pages.filter((p) => p.parentUrl === parentUrl);
+  // Match null, undefined, and "" as equivalent for root-level filtering
+  const isRoot = parentUrl === null;
+  const children = pages.filter((p) =>
+    isRoot
+      ? p.parentUrl === null || p.parentUrl === undefined || p.parentUrl === ""
+      : p.parentUrl === parentUrl
+  );
+
+  // If root has no matches, fall back to showing all pages that have no valid parent
+  const allParentUrls = new Set(pages.map((p) => p.url));
+  const orphans = isRoot
+    ? pages.filter(
+        (p) =>
+          p.parentUrl !== null &&
+          p.parentUrl !== undefined &&
+          p.parentUrl !== "" &&
+          !allParentUrls.has(p.parentUrl) &&
+          !children.includes(p)
+      )
+    : [];
+  const displayChildren = [...children, ...orphans];
 
   return (
     <>
-      {children.map((page, i) => {
+      {displayChildren.map((page, i) => {
         const color = colorMap.get(page.url);
         return (
           <div key={`${page.url}-${i}`}>
