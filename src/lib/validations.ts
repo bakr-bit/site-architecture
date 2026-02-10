@@ -27,6 +27,7 @@ export const createPageSchema = z.object({
   metaDescription: z.string().optional(),
   keyword: z.string().optional(),
   pageType: z.string().optional(),
+  icon: z.string().optional(),
   level: z.number().int().min(0).max(3).default(0),
   notes: z.string().optional(),
   position: z.number().int().optional(),
@@ -44,6 +45,7 @@ export const updatePageSchema = z.object({
   metaDescription: z.string().optional(),
   keyword: z.string().optional(),
   pageType: z.string().optional(),
+  icon: z.string().nullable().optional(),
   level: z.number().int().min(0).max(3).optional(),
   notes: z.string().optional(),
   position: z.number().int().optional(),
@@ -63,4 +65,24 @@ export const reorderSchema = z.object({
 
 export const importPagesSchema = z.object({
   pages: z.array(createPageSchema).min(1, "At least one page is required"),
+});
+
+export const generateArchitectureSchema = z.object({
+  keyword: z.string().default(""),
+  geo: z.string().min(2).max(2),
+  prompt: z.string().min(1),
+  referenceUrls: z.array(z.string().min(1)).max(10).optional(),
+});
+
+export const confirmGeneratedPagesSchema = z.object({
+  pages: z.array(z.object({
+    url: z.string().min(1),
+    metaTitle: z.string().optional(),
+    metaDescription: z.string().optional(),
+    keyword: z.string().optional(),
+    pageType: z.string().optional(),
+    userDescription: z.string().optional(),
+    level: z.number().int().min(0).max(3).default(0),
+    parentUrl: z.string().nullable(),
+  })).min(1),
 });
