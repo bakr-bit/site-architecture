@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -131,48 +131,126 @@ const PROGRESS_MESSAGES = [
   { delay: 15000, text: "Almost there..." },
 ];
 
+const PILLAR_COLORS = [
+  { badge: "bg-purple-100 text-purple-700", bg: "bg-purple-50" },
+  { badge: "bg-sky-100 text-sky-700", bg: "bg-sky-50" },
+  { badge: "bg-orange-100 text-orange-700", bg: "bg-orange-50" },
+  { badge: "bg-teal-100 text-teal-700", bg: "bg-teal-50" },
+  { badge: "bg-pink-100 text-pink-700", bg: "bg-pink-50" },
+  { badge: "bg-amber-100 text-amber-700", bg: "bg-amber-50" },
+  { badge: "bg-indigo-100 text-indigo-700", bg: "bg-indigo-50" },
+  { badge: "bg-emerald-100 text-emerald-700", bg: "bg-emerald-50" },
+  { badge: "bg-rose-100 text-rose-700", bg: "bg-rose-50" },
+  { badge: "bg-cyan-100 text-cyan-700", bg: "bg-cyan-50" },
+];
+
+const HOME_COLOR = { badge: "bg-green-100 text-green-700", bg: "bg-green-50" };
+
+/**
+ * Build a map from page URL → pillar color.
+ * Pillars are level-1 pages (direct children of "/"). All descendants inherit.
+ */
+function getPillarColorsByUrl(
+  pages: GeneratedPage[]
+): Map<string, { badge: string; bg: string }> {
+  const result = new Map<string, { badge: string; bg: string }>();
+
+  // Find pillar URLs (direct children of home) in order
+  const pillarUrls = pages
+    .filter((p) => p.parentUrl === "/")
+    .map((p) => p.url);
+
+  // Assign each pillar a color
+  const pillarColorMap = new Map<string, { badge: string; bg: string }>();
+  for (let i = 0; i < pillarUrls.length; i++) {
+    pillarColorMap.set(pillarUrls[i], PILLAR_COLORS[i % PILLAR_COLORS.length]);
+  }
+
+  // Walk up parentUrl to find the pillar ancestor
+  const pageByUrl = new Map(pages.map((p) => [p.url, p]));
+  const pillarSet = new Set(pillarUrls);
+
+  function findPillar(url: string): string | null {
+    let current = url;
+    const visited = new Set<string>();
+    while (current) {
+      if (visited.has(current)) return null;
+      visited.add(current);
+      if (pillarSet.has(current)) return current;
+      const page = pageByUrl.get(current);
+      if (!page?.parentUrl) return null;
+      current = page.parentUrl;
+    }
+    return null;
+  }
+
+  for (const page of pages) {
+    if (page.url === "/" || page.parentUrl === null) {
+      result.set(page.url, HOME_COLOR);
+    } else {
+      const pillar = findPillar(page.url);
+      if (pillar) {
+        result.set(page.url, pillarColorMap.get(pillar)!);
+      }
+    }
+  }
+
+  return result;
+}
+
 function PageTree({
   pages,
   parentUrl,
   depth,
+  colorMap,
 }: {
   pages: GeneratedPage[];
   parentUrl: string | null;
   depth: number;
+  colorMap: Map<string, { badge: string; bg: string }>;
 }) {
   const children = pages.filter((p) => p.parentUrl === parentUrl);
 
   return (
     <>
-      {children.map((page, i) => (
-        <div key={`${page.url}-${i}`}>
-          <div
-            className="flex items-center gap-2 text-xs py-0.5"
-            style={{ paddingLeft: `${depth * 20}px` }}
-          >
-            <span className="text-zinc-400 shrink-0">
-              {depth > 0 ? "\u2514" : "\u2022"}
-            </span>
-            <span className="text-zinc-900 font-mono truncate">
-              {page.url}
-            </span>
-            {page.pageType && (
-              <span
-                className={`shrink-0 rounded px-1.5 py-0.5 text-[10px] font-medium ${
-                  PAGE_TYPE_COLORS[page.pageType] ||
-                  "bg-zinc-100 text-zinc-700"
-                }`}
-              >
-                {page.pageType}
+      {children.map((page, i) => {
+        const color = colorMap.get(page.url);
+        return (
+          <div key={`${page.url}-${i}`}>
+            <div
+              className={`flex items-center gap-2 text-xs py-0.5 rounded ${color?.bg || ""}`}
+              style={{ paddingLeft: `${depth * 20}px` }}
+            >
+              <span className="text-zinc-400 shrink-0">
+                {depth > 0 ? "\u2514" : "\u2022"}
               </span>
-            )}
-            {page.keyword && (
-              <span className="text-zinc-400 truncate">{page.keyword}</span>
-            )}
+              <span className="text-zinc-900 font-mono truncate">
+                {page.url}
+              </span>
+              {page.pageType && (
+                <span
+                  className={`shrink-0 rounded px-1.5 py-0.5 text-[10px] font-medium ${
+                    color?.badge ||
+                    PAGE_TYPE_COLORS[page.pageType] ||
+                    "bg-zinc-100 text-zinc-700"
+                  }`}
+                >
+                  {page.pageType}
+                </span>
+              )}
+              {page.keyword && (
+                <span className="text-zinc-400 truncate">{page.keyword}</span>
+              )}
+            </div>
+            <PageTree
+              pages={pages}
+              parentUrl={page.url}
+              depth={depth + 1}
+              colorMap={colorMap}
+            />
           </div>
-          <PageTree pages={pages} parentUrl={page.url} depth={depth + 1} />
-        </div>
-      ))}
+        );
+      })}
     </>
   );
 }
@@ -202,6 +280,7 @@ export function GenerateDialog({
   const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   const pages = versions[selectedVersion]?.pages ?? [];
+  const colorMap = useMemo(() => getPillarColorsByUrl(pages), [pages]);
 
   // Manage progress text timers
   useEffect(() => {
@@ -572,7 +651,7 @@ export function GenerateDialog({
             </div>
             <div className="rounded-md border max-h-80 overflow-y-auto">
               <div className="p-2 space-y-0.5">
-                <PageTree pages={pages} parentUrl={null} depth={0} />
+                <PageTree pages={pages} parentUrl={null} depth={0} colorMap={colorMap} />
               </div>
             </div>
             <DialogFooter>
