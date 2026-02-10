@@ -43,7 +43,8 @@ Structure Rules:
 - parentUrl for root-level pages (children of home) = "/"
 - parentUrl for home page = null
 - Level 0 = home, 1 = direct children, 2 = grandchildren, 3 = max depth
-- Use SEO-friendly slugs (lowercase, hyphens)
+- Use SEO-friendly slugs (lowercase, hyphens). NEVER add file extensions like .html, .php, etc.
+- NEVER use language prefixes in URLs (no /en/, /ja/, /fr/ etc.). All URLs should start directly with the topic slug.
 - Generate a unique target keyword for every page
 - Build proper pillar-cluster structure: Pillar Pages at level 1, with Standard Pages and Blog Posts nested under them at level 2-3
 - Ensure every pillar page has at least 3 child pages
