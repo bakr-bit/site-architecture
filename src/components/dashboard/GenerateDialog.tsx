@@ -186,7 +186,7 @@ export function GenerateDialog({
   const [keyword, setKeyword] = useState("");
   const [geo, setGeo] = useState("us");
   const [prompt, setPrompt] = useState("");
-  const [sourceMode, setSourceMode] = useState<"search" | "reference">("search");
+  const [sourceMode, setSourceMode] = useState<"search" | "reference">("reference");
   const [referenceUrls, setReferenceUrls] = useState<string[]>([]);
   const [refUrlInput, setRefUrlInput] = useState("");
   const [versions, setVersions] = useState<GenerateVersion[]>([]);
@@ -319,7 +319,7 @@ export function GenerateDialog({
     setKeyword("");
     setGeo("us");
     setPrompt("");
-    setSourceMode("search");
+    setSourceMode("reference");
     setReferenceUrls([]);
     setRefUrlInput("");
     setVersions([]);
@@ -383,17 +383,6 @@ export function GenerateDialog({
               <div className="flex gap-1 rounded-md border border-zinc-200 p-0.5 w-fit">
                 <button
                   type="button"
-                  onClick={() => setSourceMode("search")}
-                  className={`rounded px-3 py-1 text-xs font-medium transition-colors ${
-                    sourceMode === "search"
-                      ? "bg-zinc-900 text-white"
-                      : "text-zinc-600 hover:text-zinc-900"
-                  }`}
-                >
-                  Auto Search
-                </button>
-                <button
-                  type="button"
                   onClick={() => setSourceMode("reference")}
                   className={`rounded px-3 py-1 text-xs font-medium transition-colors ${
                     sourceMode === "reference"
@@ -402,6 +391,17 @@ export function GenerateDialog({
                   }`}
                 >
                   Reference Websites
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSourceMode("search")}
+                  className={`rounded px-3 py-1 text-xs font-medium transition-colors ${
+                    sourceMode === "search"
+                      ? "bg-zinc-900 text-white"
+                      : "text-zinc-600 hover:text-zinc-900"
+                  }`}
+                >
+                  Auto Search
                 </button>
               </div>
               {sourceMode === "search" && (
