@@ -38,7 +38,7 @@ CRITICAL — Competitor Analysis:
 
 Structure Rules:
 - Every URL starts with "/"
-- Home page: url "/" with pageType "Home Page"
+- There must be EXACTLY ONE home page: url "/" with pageType "Home Page". Do NOT create /home, /us, /en, or any other home-like page.
 - Only use these page types: Home Page, Pillar Page, Standard Page, Blog Post, Landing Page
 - parentUrl for root-level pages (children of home) = "/"
 - parentUrl for home page = null
@@ -109,6 +109,11 @@ export async function POST(
 type GeneratedPage = z.infer<typeof generatedPagesSchema>[number];
 
 function postProcessPages(pages: GeneratedPage[], keyword: string): GeneratedPage[] {
+  // Remove duplicate home pages — keep only url "/", drop /home, /us, etc.
+  pages = pages.filter(
+    (p) => !(p.pageType === "Home Page" && p.url !== "/")
+  );
+
   const urlSet = new Set(pages.map((p) => p.url));
 
   // Ensure home page exists
