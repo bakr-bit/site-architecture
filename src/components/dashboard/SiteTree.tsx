@@ -109,10 +109,14 @@ function Node({ node, style, dragHandle, tree }: NodeRendererProps<TreeNode>) {
         </span>
       )}
 
-      {/* Keyword */}
+      {/* Keywords */}
       {page.keyword && (
-        <span className="text-xs text-zinc-400 truncate max-w-[120px]">
-          {page.keyword}
+        <span className="flex items-center gap-1 shrink min-w-0">
+          {page.keyword.split(",").slice(0, 2).map((kw, i) => (
+            <span key={i} className="inline-flex items-center px-1.5 py-0.5 rounded bg-zinc-100 text-[10px] text-zinc-500 truncate max-w-[90px]">
+              {kw.trim()}
+            </span>
+          ))}
         </span>
       )}
 

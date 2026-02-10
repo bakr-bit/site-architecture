@@ -220,7 +220,7 @@ export function rewriteUrls(nodes: TreeNode[], parentUrl: string | null): void {
  */
 export function pagesToCsv(pages: Page[]): string {
   const enriched = computeNavFields(pages);
-  const headers = ["URL", "Meta Title", "Meta Description", "Keyword", "Page Type", "Level", "Nav I", "Nav II", "Nav III", "Description", "Notes"];
+  const headers = ["URL", "Meta Title", "Meta Description", "Target Keywords", "Page Type", "Level", "Nav I", "Nav II", "Nav III", "Description", "Notes"];
 
   function esc(val: string | number | null | undefined): string {
     if (val == null) return "";

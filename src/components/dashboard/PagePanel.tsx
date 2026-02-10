@@ -204,14 +204,15 @@ export function PagePanel({ page, parentId, projectId, onClose, onSave, onDelete
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="panel-keyword" className="text-xs">Keyword</Label>
+            <Label htmlFor="panel-keyword" className="text-xs">Target Keywords</Label>
             <Input
               id="panel-keyword"
               value={keyword}
               onChange={(e) => setKeyword(e.target.value)}
-              placeholder="Target keyword"
+              placeholder="keyword one, keyword two, keyword three"
               className="text-sm"
             />
+            <p className="text-[10px] text-zinc-400">Comma-separated</p>
           </div>
         </div>
 

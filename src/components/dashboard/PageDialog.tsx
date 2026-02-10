@@ -155,12 +155,12 @@ export function PageDialog({ open, onOpenChange, page, projectId, onSuccess }: P
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="page-keyword">Keyword</Label>
+              <Label htmlFor="page-keyword">Target Keywords</Label>
               <Input
                 id="page-keyword"
                 value={keyword}
                 onChange={(e) => setKeyword(e.target.value)}
-                placeholder="Target keyword"
+                placeholder="keyword one, keyword two"
               />
             </div>
           </div>

@@ -122,11 +122,11 @@ function PageNode({ data }: NodeProps) {
               {page.pageType}
             </span>
           )}
-          {page.keyword && (
-            <span className="text-xs text-zinc-500 truncate">
-              {page.keyword}
+          {page.keyword && page.keyword.split(",").slice(0, 2).map((kw, i) => (
+            <span key={i} className="inline-flex items-center px-1.5 py-0.5 rounded bg-white/60 text-[10px] text-zinc-500 truncate max-w-[80px]">
+              {kw.trim()}
             </span>
-          )}
+          ))}
         </div>
       </div>
       <Handle

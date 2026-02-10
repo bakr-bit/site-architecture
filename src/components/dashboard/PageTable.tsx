@@ -74,7 +74,7 @@ export function PageTable({ pages, pillarColors, onEdit, onDelete }: PageTablePr
             <TableHead>URL</TableHead>
             <TableHead>Description</TableHead>
             <TableHead>Meta Title</TableHead>
-            <TableHead>Keyword</TableHead>
+            <TableHead>Target Keywords</TableHead>
             <TableHead>Type</TableHead>
             <TableHead className="w-12">Lvl</TableHead>
             <TableHead>Nav I</TableHead>
@@ -97,7 +97,15 @@ export function PageTable({ pages, pillarColors, onEdit, onDelete }: PageTablePr
                 <span className="text-sm max-w-[180px] truncate block">{page.metaTitle || "\u2014"}</span>
               </TableCell>
               <TableCell>
-                <span className="text-sm max-w-[120px] truncate block">{page.keyword || "\u2014"}</span>
+                {page.keyword ? (
+                  <div className="flex flex-wrap gap-1 max-w-[180px]">
+                    {page.keyword.split(",").map((kw, i) => (
+                      <span key={i} className="inline-flex items-center px-1.5 py-0.5 rounded bg-zinc-100 text-[10px] text-zinc-600 truncate max-w-[100px]">
+                        {kw.trim()}
+                      </span>
+                    ))}
+                  </div>
+                ) : "\u2014"}
               </TableCell>
               <TableCell>
                 {page.pageType ? (

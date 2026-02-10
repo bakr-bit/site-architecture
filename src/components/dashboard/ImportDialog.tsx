@@ -49,6 +49,7 @@ const HEADER_MAP: Record<string, string> = {
   keyword: "keyword",
   keywords: "keyword",
   "target keyword": "keyword",
+  "target keywords": "keyword",
   "page type": "pageType",
   pagetype: "pageType",
   type: "pageType",
