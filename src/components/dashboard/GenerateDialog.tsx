@@ -356,29 +356,6 @@ export function GenerateDialog({
         {step === "input" && (
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label>Target Keyword</Label>
-              <Input
-                value={keyword}
-                onChange={(e) => setKeyword(e.target.value)}
-                placeholder="e.g. pet insurance uk"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Country</Label>
-              <Select value={geo} onValueChange={setGeo}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {COUNTRIES.map((c) => (
-                    <SelectItem key={c.value} value={c.value}>
-                      {c.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
               <Label>Competitor Source</Label>
               <div className="flex gap-1 rounded-md border border-zinc-200 p-0.5 w-fit">
                 <button
@@ -405,9 +382,34 @@ export function GenerateDialog({
                 </button>
               </div>
               {sourceMode === "search" && (
-                <p className="text-xs text-zinc-500">
-                  Competitors will be discovered automatically from Google search results.
-                </p>
+                <div className="space-y-3">
+                  <p className="text-xs text-zinc-500">
+                    Competitors will be discovered automatically from Google search results.
+                  </p>
+                  <div className="space-y-2">
+                    <Label>Target Keyword</Label>
+                    <Input
+                      value={keyword}
+                      onChange={(e) => setKeyword(e.target.value)}
+                      placeholder="e.g. pet insurance uk"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Country</Label>
+                    <Select value={geo} onValueChange={setGeo}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {COUNTRIES.map((c) => (
+                          <SelectItem key={c.value} value={c.value}>
+                            {c.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
               )}
               {sourceMode === "reference" && (
                 <div className="space-y-2">
