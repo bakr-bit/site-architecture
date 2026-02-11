@@ -259,6 +259,9 @@ async function handleGenerate(request: Request, projectId: string) {
     );
   }
 
+  // Cap per-domain URLs so the prompt stays manageable with multiple references
+  const perDomainLimit = Math.min(200, Math.floor(500 / domains.length));
+
   const mapResults = await Promise.allSettled(
     domains.map(async (domain) => {
       const res = await fetch("https://api.firecrawl.dev/v2/map", {
@@ -269,14 +272,24 @@ async function handleGenerate(request: Request, projectId: string) {
         },
         body: JSON.stringify({
           url: `https://${domain}`,
-          limit: 200,
+          limit: perDomainLimit,
         }),
       });
       if (!res.ok) throw new Error(`Firecrawl map failed for ${domain}`);
       const data = await res.json();
       const urls: string[] = (data.links ?? [])
         .map((l: { url?: string } | string) => (typeof l === "string" ? l : l.url))
-        .filter(Boolean);
+        .filter((u: string | undefined): u is string => {
+          if (!u) return false;
+          // Only keep URLs with max 3 path segments (depth 0-2)
+          try {
+            const path = new URL(u).pathname.replace(/\/$/, "");
+            const segments = path.split("/").filter(Boolean).length;
+            return segments <= 3;
+          } catch {
+            return false;
+          }
+        });
       return { domain, urls };
     })
   );
