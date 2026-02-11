@@ -109,21 +109,38 @@ export async function POST(
 type GeneratedPage = z.infer<typeof generatedPagesSchema>[number];
 
 function postProcessPages(pages: GeneratedPage[]): GeneratedPage[] {
-  // Remove duplicate home pages — keep only url "/", drop /home, /us, etc.
+  // Strip ALL AI-generated home pages (any pageType "Home Page" or url "/" or /home etc.)
   pages = pages.filter(
-    (p) => !(p.pageType === "Home Page" && p.url !== "/")
+    (p) =>
+      p.pageType !== "Home Page" &&
+      p.url !== "/" &&
+      p.url !== "/home" &&
+      p.url !== "/homepage"
   );
+
+  // Manually add a clean home page
+  pages.unshift({
+    url: "/",
+    metaTitle: "Home",
+    metaDescription: "",
+    keyword: "",
+    pageType: "Home Page",
+    userDescription: "",
+    level: 0,
+    parentUrl: null,
+  });
 
   const urlSet = new Set(pages.map((p) => p.url));
 
-  // Fix orphan parentUrl references
+  // Any page whose parentUrl doesn't exist gets re-parented to "/"
   for (const page of pages) {
-    if (page.parentUrl && !urlSet.has(page.parentUrl)) {
-      page.parentUrl = page.url === "/" ? null : "/";
-    }
     if (page.url === "/") {
       page.parentUrl = null;
       page.level = 0;
+      continue;
+    }
+    if (!page.parentUrl || !urlSet.has(page.parentUrl)) {
+      page.parentUrl = "/";
     }
   }
 
