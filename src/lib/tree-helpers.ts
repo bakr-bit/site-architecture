@@ -332,3 +332,46 @@ export function pagesToSitemapXml(pages: Page[], domain: string): string {
 
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.join("\n")}\n</urlset>\n`;
 }
+
+/**
+ * Generates a plain-text tree of URLs for easy LLM consumption.
+ * Output looks like:
+ *   /
+ *   ├── /guides
+ *   │   ├── /guides/seo
+ *   │   └── /guides/content
+ *   └── /blog
+ */
+export function pagesToTreeText(pages: Page[]): string {
+  const pageMap = new Map<string, Page>();
+  for (const p of pages) pageMap.set(p.id, p);
+
+  const childrenMap = new Map<string | null, Page[]>();
+  for (const p of pages) {
+    const pid = p.parentId && pageMap.has(p.parentId) ? p.parentId : null;
+    if (!childrenMap.has(pid)) childrenMap.set(pid, []);
+    childrenMap.get(pid)!.push(p);
+  }
+
+  // Sort children by position
+  for (const children of childrenMap.values()) {
+    children.sort((a, b) => a.position - b.position);
+  }
+
+  const lines: string[] = [];
+
+  function walk(parentId: string | null, prefix: string) {
+    const children = childrenMap.get(parentId) || [];
+    for (let i = 0; i < children.length; i++) {
+      const page = children[i];
+      const isLast = i === children.length - 1;
+      const connector = parentId === null ? "" : (isLast ? "└── " : "├── ");
+      lines.push(`${prefix}${connector}${page.url}`);
+      const childPrefix = parentId === null ? "" : prefix + (isLast ? "    " : "│   ");
+      walk(page.id, childPrefix);
+    }
+  }
+
+  walk(null, "");
+  return lines.join("\n");
+}

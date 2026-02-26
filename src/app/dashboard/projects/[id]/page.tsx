@@ -20,7 +20,7 @@ import { ImportDialog } from "@/components/dashboard/ImportDialog";
 import { SitemapImportDialog } from "@/components/dashboard/SitemapImportDialog";
 import { GenerateDialog } from "@/components/dashboard/GenerateDialog";
 import { ViewToggle } from "@/components/dashboard/ViewToggle";
-import { pagesToCsv, pagesToSitemapXml, getPillarColorMap, getIconMap } from "@/lib/tree-helpers";
+import { pagesToCsv, pagesToSitemapXml, pagesToTreeText, getPillarColorMap, getIconMap } from "@/lib/tree-helpers";
 import type { PillarColor } from "@/lib/tree-helpers";
 import { toast } from "sonner";
 
@@ -267,6 +267,15 @@ export default function ProjectDetailPage() {
                 URL.revokeObjectURL(url);
               }}>
                 As XML Sitemap
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => {
+                if (!project || project.pages.length === 0) return;
+                const tree = pagesToTreeText(project.pages);
+                navigator.clipboard.writeText(tree).then(() => {
+                  toast.success("Tree copied to clipboard");
+                });
+              }}>
+                Copy Tree to Clipboard
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
