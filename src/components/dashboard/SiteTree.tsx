@@ -64,7 +64,6 @@ function Node({ node, style, dragHandle, tree }: NodeRendererProps<TreeNode>) {
 
   return (
     <div
-      ref={dragHandle}
       style={style}
       className={cn(
         "flex items-center gap-1.5 py-0.5 px-2 rounded cursor-pointer group transition-colors",
@@ -83,8 +82,9 @@ function Node({ node, style, dragHandle, tree }: NodeRendererProps<TreeNode>) {
         onSelectPage(node.id);
       }}
     >
-      {/* Expand/collapse toggle */}
+      {/* Drag handle + Expand/collapse toggle */}
       <span
+        ref={dragHandle}
         className={cn(
           "flex items-center justify-center w-5 h-5 shrink-0",
           node.isLeaf && "invisible"
@@ -103,7 +103,7 @@ function Node({ node, style, dragHandle, tree }: NodeRendererProps<TreeNode>) {
           {resolvedIcon}
         </span>
       )}
-      <span className="font-mono text-xs text-zinc-600 truncate max-w-[240px]">
+      <span className="font-mono text-xs text-zinc-600 truncate max-w-[400px]">
         {page.url}
       </span>
 
@@ -121,7 +121,7 @@ function Node({ node, style, dragHandle, tree }: NodeRendererProps<TreeNode>) {
       {page.keyword && (
         <span className="flex items-center gap-1 shrink min-w-0">
           {page.keyword.split(",").slice(0, 2).map((kw, i) => (
-            <span key={i} className="inline-flex items-center px-1.5 py-0.5 rounded bg-zinc-100 text-[10px] text-zinc-500 truncate max-w-[90px]">
+            <span key={i} className="inline-flex items-center px-1.5 py-0.5 rounded bg-zinc-100 text-[10px] text-zinc-500 truncate max-w-[140px]">
               {kw.trim()}
             </span>
           ))}
@@ -131,6 +131,10 @@ function Node({ node, style, dragHandle, tree }: NodeRendererProps<TreeNode>) {
       {/* Add child button (visible on hover) */}
       <button
         className="ml-auto opacity-0 group-hover:opacity-100 flex items-center justify-center w-5 h-5 rounded hover:bg-zinc-200 transition-all shrink-0"
+        onMouseDown={(e) => {
+          e.stopPropagation();
+          e.preventDefault();
+        }}
         onClick={(e) => {
           e.stopPropagation();
           onAddChild(node.id);
@@ -162,7 +166,7 @@ export function SiteTree({
   useEffect(() => {
     // Only reset tree when the actual page data changes, not on every render.
     // This prevents drag-and-drop from being reverted by unrelated re-renders.
-    const key = pages.map((p) => `${p.id}:${p.parentId}:${p.position}`).join("|");
+    const key = pages.map((p) => `${p.id}:${p.parentId}:${p.position}:${p.pageType}:${p.keyword}:${p.icon}`).join("|");
     if (key === prevPagesKey.current) return;
     prevPagesKey.current = key;
     setTreeData(flatToTree(pages));

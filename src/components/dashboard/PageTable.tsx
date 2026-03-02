@@ -89,7 +89,7 @@ export function PageTable({ pages, pillarColors, iconMap, onEdit, onDelete }: Pa
             <TableRow key={page.id}>
               <TableCell className="text-zinc-400 text-xs">{index + 1}</TableCell>
               <TableCell>
-                <span className="font-mono text-xs max-w-[200px] truncate block">
+                <span className="font-mono text-xs max-w-[400px] truncate block">
                   {iconMap.get(page.id) && <span className="mr-1">{iconMap.get(page.id)}</span>}
                   {page.url}
                 </span>
@@ -104,7 +104,7 @@ export function PageTable({ pages, pillarColors, iconMap, onEdit, onDelete }: Pa
                 {page.keyword ? (
                   <div className="flex flex-wrap gap-1 max-w-[180px]">
                     {page.keyword.split(",").map((kw, i) => (
-                      <span key={i} className="inline-flex items-center px-1.5 py-0.5 rounded bg-zinc-100 text-[10px] text-zinc-600 truncate max-w-[100px]">
+                      <span key={i} className="inline-flex items-center px-1.5 py-0.5 rounded bg-zinc-100 text-[10px] text-zinc-600 truncate max-w-[140px]">
                         {kw.trim()}
                       </span>
                     ))}

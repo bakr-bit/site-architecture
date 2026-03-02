@@ -358,6 +358,16 @@ async function handleGenerate(request: Request, projectId: string) {
     );
   }
 
+  // Persist the prompt and competitor URLs used for this generation
+  const competitorUrlList = sitemaps.flatMap((s) => s.urls);
+  await prisma.project.update({
+    where: { id: projectId },
+    data: {
+      lastGenerationPrompt: prompt || "",
+      lastCompetitorUrls: JSON.stringify(competitorUrlList),
+    },
+  });
+
   return NextResponse.json({
     versions,
     meta: {

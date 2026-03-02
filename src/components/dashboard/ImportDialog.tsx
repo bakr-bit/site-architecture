@@ -174,7 +174,7 @@ export function ImportDialog({ open, onOpenChange, projectId, onSuccess }: Impor
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-2xl">
+      <DialogContent className="sm:max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Import Pages from CSV</DialogTitle>
           <DialogDescription>
